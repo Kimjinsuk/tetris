@@ -13,9 +13,9 @@ public class UIBackgroundManager : MonoBehaviour {
 
     private void init()
     {
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < CommonDefine.MAX_BACKGROUND_WIDTH; ++i)
         {
-            for (int j = 0; j < 16; ++j)
+            for (int j = 0; j < CommonDefine.MAX_BACKGROUND_HEIGHT; ++j)
             {
                 //background piece 생성
                 GameObject piece = GameObject.Instantiate(spritePiece.gameObject);
@@ -23,10 +23,12 @@ public class UIBackgroundManager : MonoBehaviour {
                 //부모 설정
                 piece.transform.parent = this.gameObject.transform;
 
-                piece.transform.localPosition = new Vector3(i * 40, -j*40, 0);
+                piece.transform.localPosition = new Vector3(i * CommonDefine.BLOCK_SIZE, -j*CommonDefine.BLOCK_SIZE, 0);
 
                 //NGUI의 영향으로 변한 스케일 1로 설정
                 piece.transform.localScale = Vector3.one;
+
+                piece.SetActive(true);
             }
         }
     }
