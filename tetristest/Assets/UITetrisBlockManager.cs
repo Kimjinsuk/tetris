@@ -8,14 +8,35 @@ public class UITetrisBlockManager : MonoBehaviour {
 
     protected TetrisBlock currentBlock = null;
 
-	// Use this for initialization
-	void Start () {
-        int type = Random.Range(0, (int)BLOCK_TYPE.MAX);
-        currentBlock = CreateBlock((BLOCK_TYPE)type, 0, 0);
-        //Debug.Log(currentblock.ToString());
-	}
-	
+    static public UITetrisBlockManager Instance = null;
 
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+    }
+
+    // Use this for initialization
+    void Start () {
+	}
+
+    public void Init()
+    {
+        for (int i = 0; i < this.transform.childCount; ++i)
+        {
+            GameObject.Destroy(this.transform.GetChild(i).gameObject);
+        }
+    }
+
+    //랜덤으로 블록 스폰
+    public void SpawnRandomBlock()
+    {
+        Debug.Log("Spawn!");
+        int type = Random.Range(0, (int)BLOCK_TYPE.MAX);
+        currentBlock = CreateBlock((BLOCK_TYPE)type, CommonDefine.MAX_BACKGROUND_WIDTH / 2, CommonDefine.BLOCK_START_Y_POSITION);
+    }
 
     TetrisBlock CreateBlock(BLOCK_TYPE type, int x,int y)
     {
@@ -26,14 +47,13 @@ public class UITetrisBlockManager : MonoBehaviour {
         block.transform.parent = this.gameObject.transform;
 
         //포지션 변경
-        block.transform.localPosition = new Vector3(x*CommonDefine.MAX_BACKGROUND_WIDTH, y*CommonDefine.MAX_BACKGROUND_HEIGHT, 0f);
+        block.transform.localPosition = new Vector3(x * CommonDefine.BLOCK_SIZE, -y * CommonDefine.BLOCK_SIZE, 0f);
 
         //스케일 초기화
         block.transform.localScale = Vector3.one;
 
         block.SetActive(true);
 
-        Debug.Log("!!!!!!!!!!"+block.GetComponent<TetrisBlock>());
         return block.GetComponent<TetrisBlock>();
     }
 
@@ -42,18 +62,37 @@ public class UITetrisBlockManager : MonoBehaviour {
     {
         if (currentBlock != null)
         {
-            if (Input.GetKeyDown(KeyCode.UpArrow)==true)
+            if (currentBlock.controlable == true)
             {
-                currentBlock.Rotate();
+                if (Input.GetKeyDown(KeyCode.UpArrow) == true)
+                {
+                    currentBlock.Rotate();
+                }
+                if (Input.GetKeyDown(KeyCode.LeftArrow) == true)
+                {
+                    currentBlock.MoveHorizontal(Vector2.left);
+                }
+                if (Input.GetKeyDown(KeyCode.RightArrow) == true)
+                {
+                    currentBlock.MoveHorizontal(Vector2.right);
+                }
+
+                //빠르게
+                if (Input.GetKeyDown(KeyCode.DownArrow) == true)
+                {
+                    currentBlock.AddMoveSpeedTime(CommonDefine.DOWN_ADD_SPEED_TIME);
+                }
+                else if (Input.GetKeyUp(KeyCode.DownArrow) == true)
+                {
+                    currentBlock.AddMoveSpeedTime(0f);
+                }
             }
-            if (Input.GetKeyDown(KeyCode.LeftArrow) == true)
+
+            if (Input.GetKeyDown(KeyCode.Space) == true)
             {
-                currentBlock.MoveHorizontal(Vector2.left);
+                currentBlock.FallingDirectly();
             }
-            if (Input.GetKeyDown(KeyCode.RightArrow) == true)
-            {
-                currentBlock.MoveHorizontal(Vector2.right);
-            }
+
         }
     }
 }

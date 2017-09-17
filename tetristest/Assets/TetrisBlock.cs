@@ -5,8 +5,12 @@ using UnityEngine;
 public class TetrisBlock : MonoBehaviour {
 
     float currentMoveTime = 0f;
+    public bool controlable = true;
 
-    protected float moveSpeedTime = 0.6f;
+    protected float moveSpeedTime = CommonDefine.DEFAULT_MOVE_TIME;
+    //public GameManager gamemanager;
+
+    protected float addMoveSpeedTime = 0f;
 
 	// Use this for initialization
 	void Start () {
@@ -15,7 +19,7 @@ public class TetrisBlock : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        currentMoveTime += Time.deltaTime;
+        currentMoveTime += Time.deltaTime + addMoveSpeedTime;
 
         if (currentMoveTime >= moveSpeedTime)
         {
@@ -32,16 +36,45 @@ public class TetrisBlock : MonoBehaviour {
         float deltaMovement = (direction.Equals(Vector2.right)) ? moveDistance : -moveDistance;
 
         transform.localPosition += new Vector3(deltaMovement, 0f, 0f);
+
+        if (GameManager.Instance.IsValidPosition(this.transform)==false)
+        {
+            transform.localPosition += new Vector3(-deltaMovement, 0f, 0f);
+        }
     }
 
+    //내려간다
     public void Falling()
     {
         float moveDistance = CommonDefine.BLOCK_SIZE;
         transform.localPosition += new Vector3(0f, -moveDistance, 0f);
+
+        //바닥에 떨어졌을때
+        if (GameManager.Instance.IsValidPosition(this.transform) == false)
+        {
+            transform.localPosition += new Vector3(0f, moveDistance, 0f);
+            GameManager.Instance.OnPlaceBlock(this);
+        }
+    }
+
+    //빨리내린다
+    public void FallingDirectly()
+    {
+        controlable = false;
+        moveSpeedTime = CommonDefine.FALLDIRECTLY_MOVE_TIME;
+    }
+
+    public void AddMoveSpeedTime(float addTime)
+    {
+        addMoveSpeedTime = addTime;
     }
 
     public void Rotate()
     {
         transform.Rotate(new Vector3(0f, 0f, 1f), -90.0f);
+        if (GameManager.Instance.IsValidPosition(this.transform)==false)
+        {
+            transform.Rotate(new Vector3(0f, 0f, 1f), 90.0f);
+        }
     }
 }
